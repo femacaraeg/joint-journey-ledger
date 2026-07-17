@@ -186,7 +186,7 @@ export type Database = {
       }
       income_sources: {
         Row: {
-          amount: number
+          baseline_amount: number
           created_at: string
           household_id: string
           id: string
@@ -197,7 +197,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          amount?: number
+          baseline_amount?: number
           created_at?: string
           household_id: string
           id?: string
@@ -208,7 +208,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          amount?: number
+          baseline_amount?: number
           created_at?: string
           household_id?: string
           id?: string
@@ -268,6 +268,54 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payday_actuals: {
+        Row: {
+          actual_amount: number
+          created_at: string
+          household_id: string
+          id: string
+          income_source_id: string
+          note: string | null
+          payday_date: string
+          updated_at: string
+        }
+        Insert: {
+          actual_amount: number
+          created_at?: string
+          household_id: string
+          id?: string
+          income_source_id: string
+          note?: string | null
+          payday_date: string
+          updated_at?: string
+        }
+        Update: {
+          actual_amount?: number
+          created_at?: string
+          household_id?: string
+          id?: string
+          income_source_id?: string
+          note?: string | null
+          payday_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payday_actuals_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payday_actuals_income_source_id_fkey"
+            columns: ["income_source_id"]
+            isOneToOne: false
+            referencedRelation: "income_sources"
             referencedColumns: ["id"]
           },
         ]
