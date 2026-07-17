@@ -80,7 +80,7 @@ function Cards() {
             <p className="text-sm text-muted-foreground">Credit cards</p>
             <h1 className="mt-1 font-display text-3xl">Cards & statements</h1>
           </div>
-          <CardDialog householdId={hid} userId={session?.user.id} categories={cats.data ?? []} />
+          <CardDialog householdId={hid ?? undefined} userId={session?.user.id} categories={cats.data ?? []} />
         </div>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {(cards.data ?? []).map((c) => (
@@ -91,7 +91,7 @@ function Cards() {
                   <div className="text-xs text-muted-foreground">{nameFor(c.user_id)}</div>
                 </div>
                 <div className="flex gap-1">
-                  <SoaDialog householdId={hid} card={c} trigger={<Button size="sm" variant="outline">+ SOA</Button>} />
+                  <SoaDialog householdId={hid ?? undefined} card={c} trigger={<Button size="sm" variant="outline">+ SOA</Button>} />
                   <Button size="icon" variant="ghost" onClick={() => { if (confirm(`Delete card "${c.name}"?`)) delCard.mutate(c.id); }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>

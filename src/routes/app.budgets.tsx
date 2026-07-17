@@ -78,7 +78,7 @@ function Budgets() {
           <p className="text-sm text-muted-foreground">Budgets · {cycleLabel(cycle)}</p>
           <h1 className="mt-1 font-display text-3xl">Categories</h1>
         </div>
-        <CategoryDialog householdId={hid} />
+        <CategoryDialog householdId={hid ?? undefined} />
       </header>
 
       <div className="overflow-x-auto rounded-2xl border border-border bg-card">
@@ -118,7 +118,7 @@ function Budgets() {
                   <td className="px-4 py-3 capitalize text-muted-foreground">{c.rollover_setting}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
-                      <CategoryDialog householdId={hid} existing={c} trigger={
+                      <CategoryDialog householdId={hid ?? undefined} existing={c} trigger={
                         <Button size="icon" variant="ghost"><Pencil className="h-3.5 w-3.5" /></Button>
                       } />
                       <Button size="icon" variant="ghost" onClick={() => {

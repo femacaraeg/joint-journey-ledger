@@ -62,7 +62,7 @@ function Income() {
             <p className="text-sm text-muted-foreground">Regular income</p>
             <h1 className="mt-1 font-display text-3xl">Paydays</h1>
           </div>
-          <IncomeSourceDialog householdId={hid} userId={session?.user.id} />
+          <IncomeSourceDialog householdId={hid ?? undefined} userId={session?.user.id} />
         </div>
         <div className="grid gap-3 md:grid-cols-2">
           {(sources.data ?? []).map((s) => (
@@ -94,7 +94,7 @@ function Income() {
             <p className="text-sm text-muted-foreground">One-off & irregular</p>
             <h2 className="mt-1 font-display text-2xl">Other income</h2>
           </div>
-          <OtherIncomeDialog householdId={hid} userId={session?.user.id} />
+          <OtherIncomeDialog householdId={hid ?? undefined} userId={session?.user.id} />
         </div>
         <div className="overflow-x-auto rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
