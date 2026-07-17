@@ -9,38 +9,172 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSetupRouteImport } from './routes/app.setup'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppIncomeRouteImport } from './routes/app.income'
+import { Route as AppCardsRouteImport } from './routes/app.cards'
+import { Route as AppBudgetsRouteImport } from './routes/app.budgets'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSetupRoute = AppSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIncomeRoute = AppIncomeRouteImport.update({
+  id: '/income',
+  path: '/income',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCardsRoute = AppCardsRouteImport.update({
+  id: '/cards',
+  path: '/cards',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBudgetsRoute = AppBudgetsRouteImport.update({
+  id: '/budgets',
+  path: '/budgets',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/budgets': typeof AppBudgetsRoute
+  '/app/cards': typeof AppCardsRoute
+  '/app/income': typeof AppIncomeRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/setup': typeof AppSetupRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/budgets': typeof AppBudgetsRoute
+  '/app/cards': typeof AppCardsRoute
+  '/app/income': typeof AppIncomeRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/setup': typeof AppSetupRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/app/budgets': typeof AppBudgetsRoute
+  '/app/cards': typeof AppCardsRoute
+  '/app/income': typeof AppIncomeRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/setup': typeof AppSetupRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/app/budgets'
+    | '/app/cards'
+    | '/app/income'
+    | '/app/settings'
+    | '/app/setup'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/app/budgets'
+    | '/app/cards'
+    | '/app/income'
+    | '/app/settings'
+    | '/app/setup'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/auth'
+    | '/sitemap.xml'
+    | '/app/budgets'
+    | '/app/cards'
+    | '/app/income'
+    | '/app/settings'
+    | '/app/setup'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +182,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/setup': {
+      id: '/app/setup'
+      path: '/setup'
+      fullPath: '/app/setup'
+      preLoaderRoute: typeof AppSetupRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/income': {
+      id: '/app/income'
+      path: '/income'
+      fullPath: '/app/income'
+      preLoaderRoute: typeof AppIncomeRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/cards': {
+      id: '/app/cards'
+      path: '/cards'
+      fullPath: '/app/cards'
+      preLoaderRoute: typeof AppCardsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/budgets': {
+      id: '/app/budgets'
+      path: '/budgets'
+      fullPath: '/app/budgets'
+      preLoaderRoute: typeof AppBudgetsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppBudgetsRoute: typeof AppBudgetsRoute
+  AppCardsRoute: typeof AppCardsRoute
+  AppIncomeRoute: typeof AppIncomeRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSetupRoute: typeof AppSetupRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppBudgetsRoute: AppBudgetsRoute,
+  AppCardsRoute: AppCardsRoute,
+  AppIncomeRoute: AppIncomeRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSetupRoute: AppSetupRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
