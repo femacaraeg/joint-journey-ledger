@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, CheckCircle2, Pencil } from "lucide-react";
 import { useState } from "react";
 import { formatMoney, currentCycleMonth, daysUntil } from "@/lib/finance";
 import { format } from "date-fns";
@@ -20,6 +20,25 @@ export const Route = createFileRoute("/app/cards")({
 });
 
 type Category = { id: string; name: string };
+
+type Card = {
+  id: string;
+  user_id: string;
+  name: string;
+  cutoff_day: number;
+  due_day: number;
+  linked_category_id: string | null;
+};
+
+type Soa = {
+  id: string;
+  credit_card_id: string;
+  cycle_month: string;
+  amount: number;
+  due_date: string;
+  status: "paid" | "unpaid";
+  note: string | null;
+};
 
 function Cards() {
   const { data: profile } = useProfile();
@@ -92,6 +111,9 @@ function Cards() {
                 </div>
                 <div className="flex gap-1">
                   <SoaDialog householdId={hid ?? undefined} card={c} trigger={<Button size="sm" variant="outline">+ SOA</Button>} />
+                  <CardDialog householdId={hid ?? undefined} userId={c.user_id} categories={cats.data ?? []} card={c as Card} trigger={
+                    <Button size="icon" variant="ghost"><Pencil className="h-3.5 w-3.5" /></Button>
+                  } />
                   <Button size="icon" variant="ghost" onClick={() => { if (confirm(`Delete card "${c.name}"?`)) delCard.mutate(c.id); }}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -149,6 +171,9 @@ function Cards() {
                           onClick={() => markPaid.mutate({ id: s.id, status: s.status === "paid" ? "unpaid" : "paid" })}>
                           <CheckCircle2 className={cn("h-4 w-4", s.status === "paid" && "text-primary")} />
                         </Button>
+                        <SoaDialog householdId={hid ?? undefined} card={{ id: s.credit_card_id, due_day: 1 }} existing={s as Soa} trigger={
+                          <Button size="icon" variant="ghost"><Pencil className="h-3.5 w-3.5" /></Button>
+                        } />
                         <Button size="icon" variant="ghost" onClick={() => delSoa.mutate(s.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -168,73 +193,90 @@ function Cards() {
   );
 }
 
-function CardDialog({ householdId, userId, categories }: { householdId?: string; userId?: string; categories: Category[] }) {
+function CardDialog({ householdId, userId, categories, card, trigger }: { householdId?: string; userId?: string; categories: Category[]; card?: Card; trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const save = useMutation({
     mutationFn: async (fd: FormData) => {
-      const { error } = await supabase.from("credit_cards").insert({
-        household_id: householdId!,
-        user_id: userId!,
+      const payload = {
         name: String(fd.get("name")),
         cutoff_day: Number(fd.get("cutoff")),
         due_day: Number(fd.get("due")),
         linked_category_id: String(fd.get("category") || "") || null,
-      });
-      if (error) throw error;
+      };
+      if (card) {
+        const { error } = await supabase.from("credit_cards").update(payload).eq("id", card.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("credit_cards").insert({
+          household_id: householdId!,
+          user_id: userId!,
+          ...payload,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["credit_cards"] });
       setOpen(false);
-      toast.success("Card added");
+      toast.success(card ? "Card updated" : "Card added");
     },
     onError: (e: Error) => toast.error(e.message),
   });
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button><Plus className="mr-1 h-4 w-4" /> Card</Button></DialogTrigger>
+      <DialogTrigger asChild>{trigger ?? <Button><Plus className="mr-1 h-4 w-4" /> Card</Button>}</DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Add credit card</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{card ? "Edit credit card" : "Add credit card"}</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save.mutate(new FormData(e.currentTarget)); }}>
-          <div className="space-y-1.5"><Label htmlFor="name">Card name</Label><Input id="name" name="name" placeholder="BPI Signature" required /></div>
+          <div className="space-y-1.5"><Label htmlFor="name">Card name</Label><Input id="name" name="name" placeholder="BPI Signature" defaultValue={card?.name ?? ""} required /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label htmlFor="cutoff">Cutoff day</Label><Input id="cutoff" name="cutoff" type="number" min="1" max="31" required /></div>
-            <div className="space-y-1.5"><Label htmlFor="due">Due day</Label><Input id="due" name="due" type="number" min="1" max="31" required /></div>
+            <div className="space-y-1.5"><Label htmlFor="cutoff">Cutoff day</Label><Input id="cutoff" name="cutoff" type="number" min="1" max="31" defaultValue={card?.cutoff_day ?? ""} required /></div>
+            <div className="space-y-1.5"><Label htmlFor="due">Due day</Label><Input id="due" name="due" type="number" min="1" max="31" defaultValue={card?.due_day ?? ""} required /></div>
           </div>
           <div className="space-y-1.5">
             <Label>Linked category (optional)</Label>
-            <Select name="category" defaultValue="">
+            <Select name="category" defaultValue={card?.linked_category_id ?? ""}>
               <SelectTrigger><SelectValue placeholder="Choose a credit category" /></SelectTrigger>
               <SelectContent>
                 {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
-          <DialogFooter><Button type="submit" disabled={save.isPending}>Add card</Button></DialogFooter>
+          <DialogFooter><Button type="submit" disabled={save.isPending}>{card ? "Save changes" : "Add card"}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
 
-function SoaDialog({ householdId, card, trigger }: { householdId?: string; card: { id: string; due_day: number }; trigger: React.ReactNode }) {
+function SoaDialog({ householdId, card, existing, trigger }: { householdId?: string; card: { id: string; due_day: number }; existing?: Soa; trigger: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const save = useMutation({
     mutationFn: async (fd: FormData) => {
-      const { error } = await supabase.from("soa_entries").insert({
-        household_id: householdId!,
-        credit_card_id: card.id,
-        cycle_month: currentCycleMonth(),
+      const payload = {
         amount: Number(fd.get("amount")),
         due_date: String(fd.get("due_date")),
-      });
-      if (error) throw error;
+        note: String(fd.get("note") || "") || null,
+      };
+      if (existing) {
+        const { error } = await supabase.from("soa_entries").update(payload).eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("soa_entries").insert({
+          household_id: householdId!,
+          credit_card_id: card.id,
+          cycle_month: currentCycleMonth(),
+          ...payload,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["soas"] });
       setOpen(false);
-      toast.success("Statement logged");
+      toast.success(existing ? "Statement updated" : "Statement logged");
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -247,10 +289,11 @@ function SoaDialog({ householdId, card, trigger }: { householdId?: string; card:
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Log statement</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{existing ? "Edit statement" : "Log statement"}</DialogTitle></DialogHeader>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); save.mutate(new FormData(e.currentTarget)); }}>
-          <div className="space-y-1.5"><Label htmlFor="amount">Statement amount (₱)</Label><Input id="amount" name="amount" type="number" min="0" required /></div>
-          <div className="space-y-1.5"><Label htmlFor="due_date">Due date</Label><Input id="due_date" name="due_date" type="date" defaultValue={defaultDue} required /></div>
+          <div className="space-y-1.5"><Label htmlFor="amount">Statement amount (₱)</Label><Input id="amount" name="amount" type="number" min="0" step="0.01" defaultValue={existing?.amount ?? ""} required /></div>
+          <div className="space-y-1.5"><Label htmlFor="due_date">Due date</Label><Input id="due_date" name="due_date" type="date" defaultValue={existing?.due_date ?? defaultDue} required /></div>
+          <div className="space-y-1.5"><Label htmlFor="note">Note (optional)</Label><Input id="note" name="note" defaultValue={existing?.note ?? ""} /></div>
           <DialogFooter><Button type="submit" disabled={save.isPending}>Save</Button></DialogFooter>
         </form>
       </DialogContent>

@@ -3,7 +3,7 @@ import { useEffect, useMemo } from "react";
 import { useProfile, useHouseholdMembers } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { budgetStatus, cycleLabel, currentCycleMonth, daysUntil, formatMoney, statusTone } from "@/lib/finance";
+import { budgetStatus, cycleLabel, currentCycleMonth, daysUntil, formatMoney, paydaysForCycle, statusTone } from "@/lib/finance";
 import { AlertCircle, TrendingUp, Wallet, CreditCard, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,11 +40,18 @@ function Dashboard() {
     enabled: !!hid,
     queryKey: ["income-summary", hid, cycle],
     queryFn: async () => {
-      const [{ data: sources }, { data: other }] = await Promise.all([
-        supabase.from("income_sources").select("amount"),
+      const [{ data: sources }, { data: actuals }, { data: other }] = await Promise.all([
+        supabase.from("income_sources").select("id, baseline_amount, payday_days"),
+        supabase.from("payday_actuals").select("income_source_id, payday_date, actual_amount"),
         supabase.from("other_income").select("amount, received_on").gte("received_on", cycle),
       ]);
-      const regular = (sources ?? []).reduce((s, r) => s + Number(r.amount), 0);
+      const regular = (sources ?? []).reduce((sum, src) => {
+        const paydays = paydaysForCycle(cycle, src.payday_days ?? []);
+        return sum + paydays.reduce((s, d) => {
+          const a = (actuals ?? []).find((x) => x.income_source_id === src.id && x.payday_date === d);
+          return s + Number(a?.actual_amount ?? src.baseline_amount ?? 0);
+        }, 0);
+      }, 0);
       const otherTotal = (other ?? []).reduce((s, r) => s + Number(r.amount), 0);
       return { regular, otherTotal, total: regular + otherTotal };
     },
