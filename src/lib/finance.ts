@@ -44,3 +44,21 @@ export function statusTone(s: BudgetStatus) {
       ? "text-[color:var(--warning)]"
       : "text-[color:var(--success)]";
 }
+
+export function paydaysForCycle(cycleMonthISO: string, paydayDays: number[]): string[] {
+  const base = new Date(cycleMonthISO + "T00:00:00");
+  const y = base.getFullYear();
+  const m = base.getMonth();
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  const seen = new Set<number>();
+  const days = paydayDays
+    .filter((d) => Number.isFinite(d) && d >= 1 && d <= 31)
+    .map((d) => Math.min(d, lastDay))
+    .filter((d) => (seen.has(d) ? false : (seen.add(d), true)))
+    .sort((a, b) => a - b);
+  return days.map((d) => format(new Date(y, m, d), "yyyy-MM-dd"));
+}
+
+export function isPast(dateISO: string) {
+  return differenceInCalendarDays(new Date(dateISO + "T00:00:00"), new Date()) < 0;
+}
