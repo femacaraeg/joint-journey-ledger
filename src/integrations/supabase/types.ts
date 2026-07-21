@@ -14,12 +14,52 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          alert_type: Database["public"]["Enums"]["alert_type"]
+          created_at: string
+          household_id: string
+          id: string
+          is_read: boolean
+          message: string
+          reference_id: string
+        }
+        Insert: {
+          alert_type: Database["public"]["Enums"]["alert_type"]
+          created_at?: string
+          household_id: string
+          id?: string
+          is_read?: boolean
+          message: string
+          reference_id: string
+        }
+        Update: {
+          alert_type?: Database["public"]["Enums"]["alert_type"]
+          created_at?: string
+          household_id?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          reference_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           base_budget_amount: number
           created_at: string
           household_id: string
           id: string
+          is_archived: boolean
+          is_default: boolean
           name: string
           owner: Database["public"]["Enums"]["owner_kind"]
           rollover_setting: Database["public"]["Enums"]["rollover_setting"]
@@ -31,6 +71,8 @@ export type Database = {
           created_at?: string
           household_id: string
           id?: string
+          is_archived?: boolean
+          is_default?: boolean
           name: string
           owner?: Database["public"]["Enums"]["owner_kind"]
           rollover_setting?: Database["public"]["Enums"]["rollover_setting"]
@@ -42,6 +84,8 @@ export type Database = {
           created_at?: string
           household_id?: string
           id?: string
+          is_archived?: boolean
+          is_default?: boolean
           name?: string
           owner?: Database["public"]["Enums"]["owner_kind"]
           rollover_setting?: Database["public"]["Enums"]["rollover_setting"]
@@ -61,27 +105,36 @@ export type Database = {
       category_cycles: {
         Row: {
           actual_spend: number
+          budget_amount: number | null
           category_id: string
           created_at: string
+          cycle_end: string | null
           cycle_month: string
+          cycle_start: string | null
           household_id: string
           id: string
           updated_at: string
         }
         Insert: {
           actual_spend?: number
+          budget_amount?: number | null
           category_id: string
           created_at?: string
+          cycle_end?: string | null
           cycle_month: string
+          cycle_start?: string | null
           household_id: string
           id?: string
           updated_at?: string
         }
         Update: {
           actual_spend?: number
+          budget_amount?: number | null
           category_id?: string
           created_at?: string
+          cycle_end?: string | null
           cycle_month?: string
+          cycle_start?: string | null
           household_id?: string
           id?: string
           updated_at?: string
@@ -106,10 +159,12 @@ export type Database = {
       credit_cards: {
         Row: {
           created_at: string
+          credit_limit: number | null
           cutoff_day: number
           due_day: number
           household_id: string
           id: string
+          is_archived: boolean
           linked_category_id: string | null
           name: string
           updated_at: string
@@ -117,10 +172,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          credit_limit?: number | null
           cutoff_day: number
           due_day: number
           household_id: string
           id?: string
+          is_archived?: boolean
           linked_category_id?: string | null
           name: string
           updated_at?: string
@@ -128,10 +185,12 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          credit_limit?: number | null
           cutoff_day?: number
           due_day?: number
           household_id?: string
           id?: string
+          is_archived?: boolean
           linked_category_id?: string | null
           name?: string
           updated_at?: string
@@ -159,6 +218,7 @@ export type Database = {
           created_at: string
           created_by: string
           currency: string
+          cycle_start_day: number
           id: string
           invite_code: string
           name: string
@@ -168,6 +228,7 @@ export type Database = {
           created_at?: string
           created_by: string
           currency?: string
+          cycle_start_day?: number
           id?: string
           invite_code: string
           name?: string
@@ -177,6 +238,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           currency?: string
+          cycle_start_day?: number
           id?: string
           invite_code?: string
           name?: string
@@ -281,6 +343,7 @@ export type Database = {
           income_source_id: string
           note: string | null
           payday_date: string
+          status: Database["public"]["Enums"]["income_status"]
           updated_at: string
         }
         Insert: {
@@ -291,6 +354,7 @@ export type Database = {
           income_source_id: string
           note?: string | null
           payday_date: string
+          status?: Database["public"]["Enums"]["income_status"]
           updated_at?: string
         }
         Update: {
@@ -301,6 +365,7 @@ export type Database = {
           income_source_id?: string
           note?: string | null
           payday_date?: string
+          status?: Database["public"]["Enums"]["income_status"]
           updated_at?: string
         }
         Relationships: [
@@ -352,11 +417,15 @@ export type Database = {
           amount: number
           created_at: string
           credit_card_id: string
+          cycle_end: string | null
           cycle_month: string
+          cycle_start: string | null
           due_date: string
           household_id: string
           id: string
           note: string | null
+          paid_at: string | null
+          statement_amount: number | null
           status: Database["public"]["Enums"]["soa_status"]
           updated_at: string
         }
@@ -364,11 +433,15 @@ export type Database = {
           amount: number
           created_at?: string
           credit_card_id: string
+          cycle_end?: string | null
           cycle_month: string
+          cycle_start?: string | null
           due_date: string
           household_id: string
           id?: string
           note?: string | null
+          paid_at?: string | null
+          statement_amount?: number | null
           status?: Database["public"]["Enums"]["soa_status"]
           updated_at?: string
         }
@@ -376,11 +449,15 @@ export type Database = {
           amount?: number
           created_at?: string
           credit_card_id?: string
+          cycle_end?: string | null
           cycle_month?: string
+          cycle_start?: string | null
           due_date?: string
           household_id?: string
           id?: string
           note?: string | null
+          paid_at?: string | null
+          statement_amount?: number | null
           status?: Database["public"]["Enums"]["soa_status"]
           updated_at?: string
         }
@@ -415,6 +492,8 @@ export type Database = {
       join_household: { Args: { _code: string }; Returns: string }
     }
     Enums: {
+      alert_type: "budget_threshold" | "soa_due_soon"
+      income_status: "estimated" | "confirmed"
       owner_kind: "partner_a" | "partner_b" | "shared"
       pay_frequency: "monthly" | "semi_monthly" | "biweekly" | "weekly"
       rollover_setting: "rollover" | "restart"
@@ -546,6 +625,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_type: ["budget_threshold", "soa_due_soon"],
+      income_status: ["estimated", "confirmed"],
       owner_kind: ["partner_a", "partner_b", "shared"],
       pay_frequency: ["monthly", "semi_monthly", "biweekly", "weekly"],
       rollover_setting: ["rollover", "restart"],
