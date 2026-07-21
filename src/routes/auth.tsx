@@ -16,6 +16,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<"auth" | "forgot">("auth");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -62,6 +63,20 @@ function AuthPage() {
     if (!res.redirected && !res.error) navigate({ to: "/app", replace: true });
   }
 
+  async function sendReset(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      String(fd.get("email")),
+      { redirectTo: window.location.origin + "/reset-password" },
+    );
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Check your email for the reset link.");
+    setMode("auth");
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
@@ -73,6 +88,27 @@ function AuthPage() {
         </Link>
 
         <div className="rounded-2xl border border-border bg-card p-6 md:p-8">
+          {mode === "forgot" ? (
+            <div className="space-y-4">
+              <div>
+                <h2 className="font-display text-lg">Reset your password</h2>
+                <p className="text-sm text-muted-foreground">
+                  We'll email you a link to set a new password.
+                </p>
+              </div>
+              <form onSubmit={sendReset} className="space-y-4">
+                <Field name="email" label="Email" type="email" required />
+                <Button className="w-full" disabled={loading}>Send reset link</Button>
+              </form>
+              <button
+                type="button"
+                onClick={() => setMode("auth")}
+                className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+              >
+                Back to sign in
+              </button>
+            </div>
+          ) : (
           <Tabs defaultValue="signin">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
@@ -85,6 +121,13 @@ function AuthPage() {
                 <Field name="password" label="Password" type="password" required />
                 <Button className="w-full" disabled={loading}>Sign in</Button>
               </form>
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="mt-3 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+              >
+                Forgot password?
+              </button>
             </TabsContent>
 
             <TabsContent value="signup" className="mt-6">
@@ -96,6 +139,7 @@ function AuthPage() {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
           <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
             <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
