@@ -48,7 +48,7 @@ function ResetPasswordPage() {
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground">
             <Heart className="h-4 w-4" />
           </div>
-          <span className="font-display text-xl">twohearts</span>
+          <span className="font-display text-xl">moneynest</span>
         </Link>
         <div className="rounded-2xl border border-border bg-card p-6 md:p-8 space-y-4">
           <div>
