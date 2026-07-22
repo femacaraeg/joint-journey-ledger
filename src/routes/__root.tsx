@@ -79,10 +79,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Twohearts — shared finance check-ins for couples" },
+      { title: "MoneyNest — shared finance check-ins for couples" },
       { name: "description", content: "A calm, shared home for the money you and your partner manage together. Budgets, credit card statements, and payday timing at a glance." },
-      { name: "author", content: "Twohearts" },
-      { property: "og:title", content: "Twohearts — shared finance check-ins for couples" },
+      { name: "author", content: "MoneyNest" },
+      { property: "og:title", content: "MoneyNest — shared finance check-ins for couples" },
       { property: "og:description", content: "Set budgets together, log credit card statements, and see where you stand — designed for weekly check-ins, not daily anxiety." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

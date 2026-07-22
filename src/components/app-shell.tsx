@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Heart className="h-4 w-4" />
               </div>
               <div>
-                <div className="font-display text-lg leading-none">twohearts</div>
+                <div className="font-display text-lg leading-none">moneynest</div>
                 <div className="text-xs text-muted-foreground">{household?.name ?? "Setting up..."}</div>
               </div>
             </Link>
@@ -83,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
                 <Heart className="h-4 w-4" />
               </div>
-              <span className="font-display text-lg">twohearts</span>
+              <span className="font-display text-lg">moneynest</span>
             </Link>
             <button onClick={signOut} className="text-xs text-muted-foreground">Sign out</button>
           </div>
