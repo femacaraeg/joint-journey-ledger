@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,21 +55,29 @@ function AuthPage() {
   }
 
   async function google() {
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/auth",
+        skipBrowserRedirect: false,
+      },
     });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
-    if (!res.redirected && !res.error) navigate({ to: "/app", replace: true });
+    setLoading(false);
+
+    if (error) {
+      toast.error(error.message ?? "Google sign-in failed");
+      return;
+    }
   }
 
   async function sendReset(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      String(fd.get("email")),
-      { redirectTo: window.location.origin + "/reset-password" },
-    );
+    const { error } = await supabase.auth.resetPasswordForEmail(String(fd.get("email")), {
+      redirectTo: window.location.origin + "/reset-password",
+    });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Check your email for the reset link.");
@@ -98,7 +105,9 @@ function AuthPage() {
               </div>
               <form onSubmit={sendReset} className="space-y-4">
                 <Field name="email" label="Email" type="email" required />
-                <Button className="w-full" disabled={loading}>Send reset link</Button>
+                <Button className="w-full" disabled={loading}>
+                  Send reset link
+                </Button>
               </form>
               <button
                 type="button"
@@ -109,36 +118,40 @@ function AuthPage() {
               </button>
             </div>
           ) : (
-          <Tabs defaultValue="signin">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Create account</TabsTrigger>
-            </TabsList>
+            <Tabs defaultValue="signin">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign in</TabsTrigger>
+                <TabsTrigger value="signup">Create account</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="signin" className="mt-6">
-              <form onSubmit={signInEmail} className="space-y-4">
-                <Field name="email" label="Email" type="email" required />
-                <Field name="password" label="Password" type="password" required />
-                <Button className="w-full" disabled={loading}>Sign in</Button>
-              </form>
-              <button
-                type="button"
-                onClick={() => setMode("forgot")}
-                className="mt-3 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
-              >
-                Forgot password?
-              </button>
-            </TabsContent>
+              <TabsContent value="signin" className="mt-6">
+                <form onSubmit={signInEmail} className="space-y-4">
+                  <Field name="email" label="Email" type="email" required />
+                  <Field name="password" label="Password" type="password" required />
+                  <Button className="w-full" disabled={loading}>
+                    Sign in
+                  </Button>
+                </form>
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="mt-3 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+                >
+                  Forgot password?
+                </button>
+              </TabsContent>
 
-            <TabsContent value="signup" className="mt-6">
-              <form onSubmit={signUpEmail} className="space-y-4">
-                <Field name="name" label="Your name" placeholder="e.g. Fe" />
-                <Field name="email" label="Email" type="email" required />
-                <Field name="password" label="Password" type="password" required minLength={6} />
-                <Button className="w-full" disabled={loading}>Create account</Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="signup" className="mt-6">
+                <form onSubmit={signUpEmail} className="space-y-4">
+                  <Field name="name" label="Your name" placeholder="e.g. Fe" />
+                  <Field name="email" label="Email" type="email" required />
+                  <Field name="password" label="Password" type="password" required minLength={6} />
+                  <Button className="w-full" disabled={loading}>
+                    Create account
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           )}
 
           <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">

@@ -1,5 +1,13 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, PiggyBank, CreditCard, Wallet, Settings, LogOut, Heart } from "lucide-react";
+import {
+  LayoutDashboard,
+  PiggyBank,
+  CreditCard,
+  Wallet,
+  Settings,
+  LogOut,
+  Heart,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -39,7 +47,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <div>
                 <div className="font-display text-lg leading-none">moneynest</div>
-                <div className="text-xs text-muted-foreground">{household?.name ?? "Setting up..."}</div>
+                <div className="text-xs text-muted-foreground">
+                  {household?.name ?? "Setting up..."}
+                </div>
               </div>
             </Link>
             <nav className="flex flex-col gap-1">
@@ -66,8 +76,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               })}
             </nav>
             <div className="mt-10 rounded-xl border border-border bg-card p-4">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Signed in</div>
-              <div className="mt-1 truncate text-sm font-medium">{profile?.display_name || profile?.email}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Signed in
+              </div>
+              <div className="mt-1 truncate text-sm font-medium">
+                {profile?.display_name || profile?.email}
+              </div>
               <button
                 onClick={signOut}
                 className="mt-3 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
@@ -85,7 +99,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <span className="font-display text-lg">moneynest</span>
             </Link>
-            <button onClick={signOut} className="text-xs text-muted-foreground">Sign out</button>
+            <button onClick={signOut} className="text-xs text-muted-foreground">
+              Sign out
+            </button>
           </div>
           {children}
           <nav className="md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur">

@@ -226,7 +226,7 @@ DECLARE
   _code text;
 BEGIN
   IF auth.uid() IS NULL THEN RAISE EXCEPTION 'not authenticated'; END IF;
-  _code := upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 8));
+  _code := upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
   INSERT INTO public.households (name, invite_code, created_by)
     VALUES (COALESCE(NULLIF(_name, ''), 'Our Household'), _code, auth.uid())
     RETURNING id INTO _hid;
