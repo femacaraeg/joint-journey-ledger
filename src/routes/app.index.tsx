@@ -3,7 +3,15 @@ import { useEffect, useMemo } from "react";
 import { useProfile, useHouseholdMembers } from "@/hooks/useProfile";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { budgetStatus, cycleLabel, currentCycleMonth, daysUntil, formatMoney, paydaysForCycle, statusTone } from "@/lib/finance";
+import {
+  budgetStatus,
+  cycleLabel,
+  currentCycleMonth,
+  daysUntil,
+  formatMoney,
+  paydaysForCycle,
+  statusTone,
+} from "@/lib/finance";
 import { AlertCircle, TrendingUp, Wallet, CreditCard, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +23,8 @@ function Dashboard() {
   const { data: profile, isLoading } = useProfile();
   const navigate = useNavigate();
   useEffect(() => {
-    if (!isLoading && profile && !profile.household_id) navigate({ to: "/app/setup", replace: true });
+    if (!isLoading && profile && !profile.household_id)
+      navigate({ to: "/app/setup", replace: true });
   }, [profile, isLoading, navigate]);
 
   const cycle = currentCycleMonth();
@@ -47,10 +56,15 @@ function Dashboard() {
       ]);
       const regular = (sources ?? []).reduce((sum, src) => {
         const paydays = paydaysForCycle(cycle, src.payday_days ?? []);
-        return sum + paydays.reduce((s, d) => {
-          const a = (actuals ?? []).find((x) => x.income_source_id === src.id && x.payday_date === d);
-          return s + Number(a?.actual_amount ?? src.baseline_amount ?? 0);
-        }, 0);
+        return (
+          sum +
+          paydays.reduce((s, d) => {
+            const a = (actuals ?? []).find(
+              (x) => x.income_source_id === src.id && x.payday_date === d,
+            );
+            return s + Number(a?.actual_amount ?? src.baseline_amount ?? 0);
+          }, 0)
+        );
       }, 0);
       const otherTotal = (other ?? []).reduce((s, r) => s + Number(r.amount), 0);
       return { regular, otherTotal, total: regular + otherTotal };
@@ -75,11 +89,16 @@ function Dashboard() {
     const list = cats.data ?? [];
     const budgeted = list.reduce((s, c) => s + Number(c.base_budget_amount), 0);
     const spent = list.reduce((s, c) => s + c.actual_spend, 0);
-    const alerts = list.filter((c) => budgetStatus(c.actual_spend, Number(c.base_budget_amount)) !== "on_track");
+    const alerts = list.filter(
+      (c) => budgetStatus(c.actual_spend, Number(c.base_budget_amount)) !== "on_track",
+    );
     return { budgeted, spent, alerts };
   }, [cats.data]);
 
-  const upcoming = (soas.data ?? []).filter((s) => s.status === "unpaid" && daysUntil(s.due_date) <= 7);
+  const unbudgeted = (income.data?.total ?? 0) - totals.budgeted;
+  const upcoming = (soas.data ?? []).filter(
+    (s) => s.status === "unpaid" && daysUntil(s.due_date) <= 7,
+  );
 
   if (!profile?.household_id) return null;
 
@@ -100,21 +119,28 @@ function Dashboard() {
           <div className="mt-4 grid gap-6 md:grid-cols-2">
             <div>
               <div className="text-sm opacity-80">Income this cycle</div>
-              <div className="mt-1 font-display text-4xl">{formatMoney(income.data?.total ?? 0)}</div>
+              <div className="mt-1 font-display text-4xl">
+                {formatMoney(income.data?.total ?? 0)}
+              </div>
               <div className="mt-1 text-xs opacity-70">
-                {formatMoney(income.data?.regular ?? 0)} salaries · {formatMoney(income.data?.otherTotal ?? 0)} other
+                {formatMoney(income.data?.regular ?? 0)} salaries ·{" "}
+                {formatMoney(income.data?.otherTotal ?? 0)} other
               </div>
             </div>
             <div>
               <div className="text-sm opacity-80">Total budgeted</div>
               <div className="mt-1 font-display text-4xl">{formatMoney(totals.budgeted)}</div>
-              <div className="mt-1 text-xs opacity-70">{formatMoney(totals.spent)} spent so far</div>
+              <div className="mt-1 text-xs opacity-70">
+                {formatMoney(totals.spent)} spent so far
+              </div>
             </div>
           </div>
           <div className="mt-6 h-2 rounded-full bg-primary-foreground/20">
             <div
               className="h-2 rounded-full bg-primary-foreground"
-              style={{ width: `${Math.min(100, totals.budgeted ? (totals.spent / totals.budgeted) * 100 : 0)}%` }}
+              style={{
+                width: `${Math.min(100, totals.budgeted ? (totals.spent / totals.budgeted) * 100 : 0)}%`,
+              }}
             />
           </div>
         </Tile>
@@ -134,14 +160,20 @@ function Dashboard() {
                 return (
                   <li key={c.id} className="flex items-center justify-between gap-2">
                     <span className="truncate">{c.name}</span>
-                    <span className={cn("font-medium", statusTone(st))}>{st === "over" ? "over" : "80%+"}</span>
+                    <span className={cn("font-medium", statusTone(st))}>
+                      {st === "over" ? "over" : "80%+"}
+                    </span>
                   </li>
                 );
               })}
               {upcoming.slice(0, 3).map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-2 text-[color:var(--warning)]">
+                <li
+                  key={s.id}
+                  className="flex items-center justify-between gap-2 text-[color:var(--warning)]"
+                >
                   <span className="truncate">
-                    {(s as { credit_cards?: { name?: string } }).credit_cards?.name} due {daysUntil(s.due_date)}d
+                    {(s as { credit_cards?: { name?: string } }).credit_cards?.name} due{" "}
+                    {daysUntil(s.due_date)}d
                   </span>
                   <span className="font-medium">{formatMoney(s.amount)}</span>
                 </li>
@@ -155,9 +187,31 @@ function Dashboard() {
             <Wallet className="h-3.5 w-3.5" /> Categories
           </div>
           <div className="mt-2 font-display text-3xl">{(cats.data ?? []).length}</div>
-          <Link to="/app/budgets" className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline">
+          <Link
+            to="/app/budgets"
+            className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
+          >
             Manage budgets →
           </Link>
+        </Tile>
+
+        <Tile className="col-span-3 md:col-span-2">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <Wallet className="h-3.5 w-3.5" /> Unbudgeted
+          </div>
+          <div
+            className={cn(
+              "mt-2 font-display text-3xl",
+              unbudgeted >= 0 ? "text-[color:var(--success)]" : "text-destructive",
+            )}
+          >
+            {formatMoney(unbudgeted)}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {unbudgeted >= 0
+              ? "Income beyond what's budgeted"
+              : "Budgeted more than this cycle's income"}
+          </p>
         </Tile>
 
         <Tile className="col-span-3 md:col-span-2">
@@ -167,7 +221,10 @@ function Dashboard() {
           <div className="mt-2 font-display text-3xl">
             {(soas.data ?? []).filter((s) => s.status === "unpaid").length}
           </div>
-          <Link to="/app/cards" className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline">
+          <Link
+            to="/app/cards"
+            className="mt-2 inline-block text-xs text-primary underline-offset-4 hover:underline"
+          >
             View cards →
           </Link>
         </Tile>
@@ -201,7 +258,11 @@ function Dashboard() {
                   <div
                     className={cn(
                       "h-1.5 rounded-full",
-                      st === "over" ? "bg-destructive" : st === "near" ? "bg-[color:var(--warning)]" : "bg-primary",
+                      st === "over"
+                        ? "bg-destructive"
+                        : st === "near"
+                          ? "bg-[color:var(--warning)]"
+                          : "bg-primary",
                     )}
                     style={{ width: `${pct}%` }}
                   />
@@ -219,5 +280,7 @@ function Dashboard() {
 }
 
 function Tile({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <div className={cn("rounded-2xl border border-border bg-card p-5", className)}>{children}</div>;
+  return (
+    <div className={cn("rounded-2xl border border-border bg-card p-5", className)}>{children}</div>
+  );
 }

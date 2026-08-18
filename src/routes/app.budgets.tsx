@@ -89,7 +89,7 @@ function Budgets() {
               <th className="px-4 py-3 text-left font-medium">Owner</th>
               <th className="px-4 py-3 text-right font-medium">Budget</th>
               <th className="px-4 py-3 text-right font-medium">Spent (this cycle)</th>
-              <th className="px-4 py-3 text-left font-medium">Rollover</th>
+              <th className="px-4 py-3 text-left font-medium">Cycle handling</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
@@ -98,6 +98,7 @@ function Budgets() {
               const cyc = (cyclesQ.data ?? []).find((x) => x.category_id === c.id);
               const spend = Number(cyc?.actual_spend ?? 0);
               const st = budgetStatus(spend, Number(c.base_budget_amount));
+              const cycleHandlingLabel = c.rollover_setting === "rollover" ? "Roll over unused" : "Restart each cycle";
               return (
                 <tr key={c.id} className="border-t border-border">
                   <td className="px-4 py-3 font-medium">{c.name}</td>
@@ -115,7 +116,7 @@ function Budgets() {
                     />
                     <div className={cn("mt-0.5 text-[10px] uppercase tracking-wider", statusTone(st))}>{st.replace("_", " ")}</div>
                   </td>
-                  <td className="px-4 py-3 capitalize text-muted-foreground">{c.rollover_setting}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{cycleHandlingLabel}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
                       <CategoryDialog householdId={hid ?? undefined} existing={c} trigger={
@@ -139,7 +140,7 @@ function Budgets() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Rollover: unused (or over) amount carries into next cycle. Restart: budget resets each month.
+        Cycle handling: rollover keeps unused or over-budget amounts for the next cycle, while restart resets the category each cycle.
       </p>
     </div>
   );
@@ -201,7 +202,7 @@ function CategoryDialog({ householdId, existing, trigger }: { householdId?: stri
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label>Rollover</Label>
+              <Label>Cycle handling</Label>
               <Select name="rollover" defaultValue={existing?.rollover_setting ?? "restart"}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
